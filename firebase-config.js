@@ -1,5 +1,5 @@
-/* Configuração pública do aplicativo Web Firebase. Preencha com os dados do seu projeto. */
-window.ICNV_FIREBASE_CONFIG = {
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
   apiKey: "AIzaSyDje_kdhHmQ7uwj79fXme9tsYfp8EBnUy8",
   authDomain: "coletanea-icnv.firebaseapp.com",
   databaseURL: "https://coletanea-icnv-default-rtdb.firebaseio.com",
