@@ -1,0 +1,10 @@
+{
+  "rules": {
+    "rooms": {
+      "ICNV2027": {
+        ".read": "auth != null",
+        ".write": "auth != null && ((!data.exists() && newData.child('ownerUid').val() === auth.uid) || (data.exists() && data.child('ownerUid').val() === auth.uid))"
+      }
+    }
+  }
+}

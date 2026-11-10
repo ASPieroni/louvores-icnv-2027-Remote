@@ -1,0 +1,44 @@
+# Louvores ICNV — Controle Remoto (código fixo)
+
+Projeto separado do aplicativo original. Esta versão mantém o catálogo e os recursos locais e acrescenta sincronização de louvor/tom pela internet.
+
+## O que sincroniza
+- Louvor aberto/fechado, título e tom (transposição).
+- Letra e cifras do louvor aberto, inclusive se o acompanhante não tiver esse louvor no catálogo. Nesse caso, ele aparece como transmissão temporária e não é salvo no catálogo local.
+
+## Controles sem atrapalhar as cifras
+O controle remoto fica recolhido dentro da área da lista de louvores. Ele não é flutuante e desaparece quando a tela de cifras é aberta; portanto, não cobre letra nem cifras.
+
+## Código fixo
+**ICNV2027** — não há senha nem código aleatório. O aplicativo guarda esse código no aparelho depois da primeira conexão e tenta reconectar automaticamente quando for aberto novamente. Qualquer pessoa que conheça o código poderá acompanhar.
+
+## 1. Configurar o Firebase (uma vez)
+1. Entre em https://console.firebase.google.com/ e crie um projeto.
+2. Em Authentication > Sign-in method, ative **Anonymous**.
+3. Crie um **Realtime Database**.
+4. Na aba Rules, cole o conteúdo de `regras_firebase_realtime_database.json` e publique.
+5. Em Configurações do projeto > Geral > Seus aplicativos, adicione um aplicativo Web (`</>`).
+6. Copie os valores da configuração Web para `firebase-config.js`, substituindo os campos `COLE_...` e `SEU_...`.
+
+Não é necessário criar senha de usuário. A configuração Web contém identificadores públicos; não cole senha de conta Google nesse arquivo.
+
+## 2. Publicar em um NOVO repositório GitHub
+1. Crie um novo repositório, por exemplo `louvores-icnv-controle-remoto`.
+2. Envie todos os arquivos desta pasta para a raiz do novo repositório, incluindo `icons`.
+3. Edite `firebase-config.js` no GitHub e preencha com a configuração do Firebase.
+4. Em Settings > Pages, escolha Deploy from a branch, branch `main` e pasta `/(root)`, depois salve.
+5. Aguarde o endereço do GitHub Pages.
+
+**Não altere o repositório original** `louvores-icnv-2027`; este projeto é independente.
+
+## 3. Utilizar
+1. Abra o novo endereço no aparelho que será o mestre e toque em **Iniciar controle (mestre)**.
+2. Nos outros aparelhos, abra o mesmo endereço e toque em **Conectar ao mestre**. O código fixo é ICNV2027 e não precisa ser digitado.
+3. Ao abrir outro louvor ou mudar o tom no mestre, os acompanhantes recebem a alteração.
+4. O acompanhante que já conectou uma vez tentará reconectar automaticamente nas próximas aberturas.
+
+## Limitações e segurança
+- Apenas o aparelho/identidade anônima que iniciou a sala pode publicar alterações. Se os dados do navegador do mestre forem apagados ou ele trocar de aparelho/navegador, a identidade muda; será necessário limpar manualmente `rooms/ICNV2027` no Realtime Database para registrar um novo mestre.
+- Qualquer pessoa que conheça o código fixo pode acompanhar a sala. O código fixo sem senha é prático, mas não oferece controle de acesso individual.
+- É necessário internet nos aparelhos. A sincronização não transmite áudio, vídeo ou a tela; transmite somente louvor, letra/cifras e tom.
+- Sem configurar o Firebase, o catálogo local continua funcionando, mas a sincronização não estará ativa.
