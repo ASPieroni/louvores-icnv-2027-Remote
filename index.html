@@ -110,8 +110,10 @@ button.action{border:0;border-radius:12px;padding:13px 10px;background:var(--acc
 .backup-menu summary{list-style:none;display:grid;place-items:center;width:34px;height:34px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--text);font-size:23px;font-weight:800;line-height:1;cursor:pointer}
 .backup-menu summary::-webkit-details-marker{display:none}
 .backup-menu-panel{position:absolute;top:calc(100% + 7px);right:0;z-index:30;min-width:190px;padding:6px;border:1px solid var(--line);border-radius:12px;background:var(--panel);box-shadow:var(--shadow)}
-.backup-menu-panel button,.backup-menu-panel label{display:block;width:100%;padding:10px;border:0;border-radius:8px;background:transparent;color:var(--text);font:700 13px system-ui;text-align:left;cursor:pointer}
-.backup-menu-panel button:active,.backup-menu-panel label:active{background:var(--panel2)}
+.backup-menu-panel button,.backup-menu-panel label,.backup-menu-panel a{display:block;width:100%;padding:10px;border:0;border-radius:8px;background:transparent;color:var(--text);font:700 13px system-ui;text-align:left;text-decoration:none;cursor:pointer}
+.backup-menu-panel button:active,.backup-menu-panel label:active,.backup-menu-panel a:active{background:var(--panel2)}
+#backupDownloadLink{display:none;color:var(--accent);border-top:1px solid var(--line);margin-top:4px}
+#backupDownloadLink.ready{display:block}
 #importBackupFile{display:none}
 @media(max-width:430px){.brand-info{gap:8px}.brandmark{width:38px;height:38px;flex-basis:38px}.theme-switcher{gap:4px;padding:4px 6px}.theme-dot{width:17px;height:17px}}
 </style></head><body>
@@ -132,6 +134,7 @@ button.action{border:0;border-radius:12px;padding:13px 10px;background:var(--acc
         <summary aria-label="Mais opções" title="Mais opções">⋮</summary>
         <div class="backup-menu-panel">
           <button type="button" id="exportBackup">⬇ Exportar backup</button>
+          <a id="backupDownloadLink" href="#" download="backup-louvores-icnv.json">⬇ Baixar arquivo JSON</a>
           <label for="importBackupFile">⬆ Importar backup</label>
           <input type="file" id="importBackupFile" accept=".json,application/json">
         </div>
@@ -722,46 +725,80 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
   window.__icnvRemoteIsApplying = ()=>remoteApply;
 })();
 
-// Backup portável dos dados que o app mantém neste aparelho.
+// Backup portável dos dados do app. A cópia do JSON também funciona em webviews
+// que bloqueiam downloads automáticos ou URLs temporários.
 (()=>{
- const backupKeys=['icnv_catalog_v1','icnv_favorites','icnv_repertorio','icnv_chord_offsets_v1','icnv_theme'];
- const validateBackupData=data=>{
-   if(!data||typeof data!=='object'||Array.isArray(data))return false;
-   const catalog=data.icnv_catalog_v1;
-   if(catalog!==null&&(!Array.isArray(catalog)||!catalog.every(x=>x&&Number.isFinite(x.id)&&typeof x.title==='string'&&Array.isArray(x.lines)&&x.lines.every(line=>typeof line==='string'))))return false;
+ const keys=['icnv_catalog_v1','icnv_favorites','icnv_repertorio','icnv_chord_offsets_v1','icnv_theme'];
+ const byId=id=>document.getElementById(id);
+ const button=byId('exportBackup'), link=byId('backupDownloadLink'), menu=byId('backupMenu');
+ if(!button||!link)return;
+ let backupUrl=null;
+ const makeBackup=()=>{
+   const data={};
+   keys.forEach(key=>{
+     let raw=null;
+     try{raw=localStorage.getItem(key);}catch(storageError){throw new Error('O navegador bloqueou o acesso aos dados salvos ('+key+').');}
+     if(raw===null){data[key]=null;return;}
+     try{data[key]=JSON.parse(raw);}catch(parseError){data[key]=null;}
+   });
+   return JSON.stringify({app:'Louvores ICNV',version:1,createdAt:new Date().toISOString(),data},null,2);
+ };
+ button.addEventListener('click',function(){
+   let json;
+   try{
+     json=makeBackup();
+     const filename='backup-louvores-icnv-'+new Date().toISOString().slice(0,10)+'.json';
+     link.download=filename;
+     // Tenta primeiro o download Blob (funciona em navegadores comuns).
+     let href='data:application/json;charset=utf-8,'+encodeURIComponent(json);
+     try{
+       if(typeof Blob==='function'&&window.URL&&typeof URL.createObjectURL==='function'){
+         const blob=new Blob([json],{type:'application/json;charset=utf-8'});
+         if(backupUrl)URL.revokeObjectURL(backupUrl);
+         backupUrl=URL.createObjectURL(blob);
+         href=backupUrl;
+       }
+     }catch(blobError){
+       // Continua com data URL abaixo em navegadores que bloqueiam Blob URLs.
+       backupUrl=null;
+     }
+     link.href=href;
+     link.classList.add('ready');
+     // Aciona diretamente o link real dentro do gesto do usuário.
+     link.click();
+     // Fecha o menu de três pontos assim que o download for acionado.
+     if(menu)menu.open=false;
+     button.textContent='⬇ Exportar backup';
+     if(backupUrl)setTimeout(()=>{try{URL.revokeObjectURL(backupUrl);}catch(e){}backupUrl=null;},60000);
+   }catch(error){
+     // Se os dados salvos estiverem inacessíveis, mostra o motivo com clareza.
+     alert('Não consegui preparar o arquivo JSON. '+(error&&error.message?error.message:'Tente abrir o HTML no Chrome e permitir downloads.'));
+   }
+ });
+ const importInput=byId('importBackupFile');
+ const validData=data=>{
+   if(!data||typeof data!=='object'||Array.isArray(data)||!keys.every(key=>Object.prototype.hasOwnProperty.call(data,key)))return false;
+   const songs=data.icnv_catalog_v1;
+   if(songs!==null&&(!Array.isArray(songs)||!songs.every(song=>song&&Number.isFinite(song.id)&&typeof song.title==='string'&&Array.isArray(song.lines)&&song.lines.every(line=>typeof line==='string'))))return false;
    for(const key of ['icnv_favorites','icnv_repertorio']){const value=data[key];if(value!==null&&(!Array.isArray(value)||!value.every(id=>typeof id==='string'||Number.isFinite(id))))return false;}
    const offsets=data.icnv_chord_offsets_v1;
    if(offsets!==null&&(!offsets||typeof offsets!=='object'||Array.isArray(offsets)))return false;
-   const theme=data.icnv_theme;
-   if(theme!==null&&!['dark','verde','roxo','azul-original'].includes(theme))return false;
-   return backupKeys.every(key=>Object.prototype.hasOwnProperty.call(data,key));
+   return data.icnv_theme===null||['dark','verde','roxo','azul-original'].includes(data.icnv_theme);
  };
- const exportButton=document.getElementById('exportBackup');
- const importInput=document.getElementById('importBackupFile');
- const menu=document.getElementById('backupMenu');
- exportButton.addEventListener('click',()=>{
-   const data={};backupKeys.forEach(key=>{const raw=localStorage.getItem(key);data[key]=raw===null?null:JSON.parse(raw)});
-   const backup={app:'Louvores ICNV',version:1,createdAt:new Date().toISOString(),data};
-   const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
-   const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;
-   a.download='backup-louvores-icnv-'+new Date().toISOString().slice(0,10)+'.json';
-   document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);menu.open=false;
- });
- importInput.addEventListener('change',async()=>{
+ if(importInput)importInput.addEventListener('change',async()=>{
    const file=importInput.files&&importInput.files[0];if(!file)return;
    try{
      const backup=JSON.parse(await file.text());
-     if(!backup||backup.app!=='Louvores ICNV'||backup.version!==1||!validateBackupData(backup.data))throw new Error('invalid');
+     if(!backup||backup.app!=='Louvores ICNV'||backup.version!==1||!validData(backup.data))throw new Error('invalid backup');
      if(!confirm('Importar este backup vai substituir os louvores, favoritos, repertório, tema e ajustes de cifras salvos neste aparelho. Deseja continuar?'))return;
-     const previous={};backupKeys.forEach(key=>previous[key]=localStorage.getItem(key));
-     try{backupKeys.forEach(key=>{const value=backup.data[key];if(value===null)localStorage.removeItem(key);else localStorage.setItem(key,JSON.stringify(value));});}
-     catch(error){backupKeys.forEach(key=>{if(previous[key]===null)localStorage.removeItem(key);else localStorage.setItem(key,previous[key]);});throw error;}
+     const old={};keys.forEach(key=>old[key]=localStorage.getItem(key));
+     try{keys.forEach(key=>{const value=backup.data[key];if(value===null)localStorage.removeItem(key);else localStorage.setItem(key,JSON.stringify(value));});}
+     catch(error){keys.forEach(key=>{if(old[key]===null)localStorage.removeItem(key);else localStorage.setItem(key,old[key]);});throw error;}
      alert('Backup importado. O app será atualizado com os dados restaurados.');location.reload();
-   }catch(error){alert('Não foi possível importar. Confira se selecionou um arquivo JSON de backup válido do Louvores ICNV.');}
-   finally{importInput.value='';menu.open=false;}
+   }catch(error){alert('Não foi possível importar. Confira se selecionou um arquivo JSON válido exportado pelo Louvores ICNV.');}
+   finally{importInput.value='';if(menu)menu.open=false;}
  });
 })();
-
 </script>
 <script src="./firebase-config.js"></script>
 <script type="module" src="./firebase-sync.js"></script>
