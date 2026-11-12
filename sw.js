@@ -1,4 +1,4 @@
-const CACHE_NAME = "louvores-icnv-controle-v1";
+const CACHE_NAME = "louvores-icnv-controle-v2";
 const CORE = ["./", "./index.html", "./manifest.webmanifest", "./firebase-config.js", "./firebase-sync.js", "./icons/icon-192.svg", "./icons/icon-512.svg"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(CORE)).then(() => self.skipWaiting()));
