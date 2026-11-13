@@ -376,22 +376,27 @@ function renderAlignedChordLine(originalLine, step, lineIndex){
  const div=document.createElement('div');div.className='line chords';div.dataset.lineIndex=String(lineIndex);
  const tokens=[...originalLine.matchAll(/\S+/g)];
  const style=getComputedStyle(div);
- const canvas=document.createElement('canvas');const ctx=canvas.getContext('2d');ctx.font=`${style.fontSize} ${style.fontFamily}`;
- const measure=(txt)=>ctx.measureText(txt).width + txt.length*0.5;
+ const canvas=document.createElement('canvas');const ctx=canvas.getContext('2d');
+ // Measure in base font, then scale spacing in lockstep with the lyric zoom.
+ const baseFontSize=(parseFloat(style.fontSize)||15)/lyricZoom;
+ ctx.font=`${style.fontWeight} ${baseFontSize}px ${style.fontFamily}`;
+ const baseMeasure=(txt)=>ctx.measureText(txt).width+txt.length*0.5;
+ const spacingScale=1+(lyricZoom-1)*1.00;
+ const measure=(txt)=>baseMeasure(txt)*spacingScale;
  div.style.width=`${Math.max(measure(originalLine),1)}px`;div.style.minWidth=`${Math.max(measure(originalLine),1)}px`;
- let previousRight=0, maxRight=0; const minGap=17;
- tokens.forEach(m=>{
- const chord=transposeToken(m[0],step);
- const wanted=measure(originalLine.slice(0,m.index));
- const baseX=Math.max(wanted, previousRight+minGap);
- const tokenIndex=[...tokens].indexOf(m);
- const offset=getChordOffset(selected.id,lineIndex,tokenIndex);
- const x=Math.max(0,baseX+offset);
- const span=document.createElement('span');span.className='chord-token';span.dataset.tokenIndex=String(tokenIndex);span.dataset.baseX=String(baseX);span.style.left=`${x}px`;span.textContent=chord;div.appendChild(span);
- previousRight=baseX+ctx.measureText(chord).width+2;
- maxRight=Math.max(maxRight,x+ctx.measureText(chord).width+2);
- div.style.width=`${Math.max(parseFloat(div.style.width)||0,maxRight)}px`;
- div.style.minWidth=div.style.width;
+ let previousRight=0,maxRight=0;const minGap=17*spacingScale;
+ tokens.forEach((m,tokenIndex)=>{
+   const chord=transposeToken(m[0],step);
+   const wanted=measure(originalLine.slice(0,m.index));
+   const baseX=Math.max(wanted,previousRight+minGap);
+   const offset=getChordOffset(selected.id,lineIndex,tokenIndex);
+   const x=Math.max(0,baseX+offset*spacingScale);
+   const span=document.createElement('span');span.className='chord-token';span.dataset.tokenIndex=String(tokenIndex);span.dataset.baseX=String(baseX);span.style.left=`${x}px`;span.textContent=chord;div.appendChild(span);
+   const actualChordWidth=baseMeasure(chord)*lyricZoom;
+   previousRight=baseX+actualChordWidth+2*spacingScale;
+   maxRight=Math.max(maxRight,x+actualChordWidth+2*spacingScale);
+   div.style.width=`${Math.max(parseFloat(div.style.width)||0,maxRight)}px`;
+   div.style.minWidth=div.style.width;
  });
  if(!tokens.length)div.textContent=' ';
  return div;
