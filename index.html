@@ -525,7 +525,7 @@ try {
    const usedIds=new Set(savedIds);
    songs=songs.map(base=>{
     const k=icnvSongTitleKey(base.title),saved=savedByTitle.get(k);
-    if(saved)return {...base,...saved,id:saved.id,number:saved.number,title:base.title,lines:base.lines,youtubeUrl:saved.youtubeUrl||base.youtubeUrl||''};
+    if(saved)return {...base,...saved,id:saved.id,number:saved.number,title:base.title,lines:saved.lines,youtubeUrl:saved.youtubeUrl||base.youtubeUrl||''};
     const result={...base};
     if(usedIds.has(String(result.id)))result.id=nextId++;
     usedIds.add(String(result.id));
