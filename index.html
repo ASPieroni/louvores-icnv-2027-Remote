@@ -1677,18 +1677,18 @@ function showAnnotationSaveStatus(ok){
  toast.textContent=ok?'Anotações salvas neste navegador':'Não foi possível salvar as anotações neste navegador';toast.style.background=ok?'#166534':'#b91c1c';toast.hidden=false;clearTimeout(showAnnotationSaveStatus.timer);showAnnotationSaveStatus.timer=setTimeout(()=>{toast.hidden=true;},2600);
 }
 function stopSongAnnotationGesture(){if(!songAnnotationDrawing)return;songAnnotationDrawing=false;songAnnotationErasing=false;songAnnotationPath=null;const svg=$('lyrics').querySelector('.song-annotation-layer');if(svg)svg._activePath=null;}
-function setSongPenMode(on,skipSave=false){
+function setSongPenMode(on,skipSave=false,silentStatus=false){
  const next=!!on;
  if(next&&songEraserMode){stopSongAnnotationGesture();saveSongAnnotations();setSongEraserMode(false,true);}
- if(!next&&songPenMode){stopSongAnnotationGesture();if(!skipSave){const saved=saveSongAnnotations();showAnnotationSaveStatus(saved);}}
+ if(!next&&songPenMode){stopSongAnnotationGesture();if(!skipSave){const saved=saveSongAnnotations();if(!silentStatus)showAnnotationSaveStatus(saved);}}
  songPenMode=next;const viewer=$('viewer'),button=$('annotationPen');
  if(viewer){viewer.classList.toggle('song-pen-mode',songPenMode||songEraserMode);viewer.classList.toggle('song-eraser-mode',songEraserMode);}
  if(button){button.setAttribute('aria-pressed',String(songPenMode));button.setAttribute('aria-label',songPenMode?'Desativar caneta vermelha':'Ativar caneta vermelha');button.title=songPenMode?'Caneta vermelha ativa: toque e arraste para desenhar':'Caneta vermelha: desenhar observações';button.innerHTML=songPenMode?'🖊️ <span class="annotation-pen-active-word">Ativa</span>':'🖊️ Caneta';}
 }
-function setSongEraserMode(on,skipSave=false){
+function setSongEraserMode(on,skipSave=false,silentStatus=false){
  const next=!!on;
  if(next&&songPenMode){stopSongAnnotationGesture();saveSongAnnotations();setSongPenMode(false,true);}
- if(!next&&songEraserMode){stopSongAnnotationGesture();if(!skipSave){const saved=saveSongAnnotations();showAnnotationSaveStatus(saved);}}
+ if(!next&&songEraserMode){stopSongAnnotationGesture();if(!skipSave){const saved=saveSongAnnotations();if(!silentStatus)showAnnotationSaveStatus(saved);}}
  songEraserMode=next;const viewer=$('viewer'),button=$('annotationEraser');
  if(viewer){viewer.classList.toggle('song-pen-mode',songPenMode||songEraserMode);viewer.classList.toggle('song-eraser-mode',songEraserMode);}
  if(button){button.setAttribute('aria-pressed',String(songEraserMode));button.setAttribute('aria-label',songEraserMode?'Desativar borracha':'Ativar borracha');button.title=songEraserMode?'Borracha ativa: toque ou passe sobre os traços para apagar':'Borracha: apague traços tocando ou passando sobre eles';button.innerHTML=songEraserMode?'🧽 <span class="annotation-pen-active-word">Ativa</span>':'🧽 Borracha';}
@@ -1741,7 +1741,7 @@ $('viewer').addEventListener('touchend',e=>{
 },{passive:true});
 
 function positionFocusPdfButton(){const viewer=$('viewer'),lyrics=$('lyrics'),button=$('focusSongPdf');if(!viewer||!lyrics||!button||!viewer.classList.contains('focus-lyrics'))return;const rect=lyrics.getBoundingClientRect();button.style.setProperty('--focus-pdf-top',Math.round(rect.top+7)+'px');}
-$('lyrics').addEventListener('dblclick',()=>{if(presentationMode){returnToSongList();return;}saveSongAnnotations();setSongPenMode(false);setSongEraserMode(false);const viewer=$('viewer');viewer.classList.toggle('focus-lyrics');ensureSongAnnotations($('lyrics'));requestAnimationFrame(()=>{redrawSongAnnotations();positionFocusPdfButton();});});
+$('lyrics').addEventListener('dblclick',()=>{if(presentationMode){returnToSongList();return;}saveSongAnnotations();setSongPenMode(false,false,true);setSongEraserMode(false,false,true);const viewer=$('viewer');viewer.classList.toggle('focus-lyrics');ensureSongAnnotations($('lyrics'));requestAnimationFrame(()=>{redrawSongAnnotations();positionFocusPdfButton();});});
 window.addEventListener('resize',()=>requestAnimationFrame(positionFocusPdfButton));
 $('focusUp').onclick=()=>{shift++;renderSong()};$('focusDown').onclick=()=>{shift--;renderSong()};$('focusReset').onclick=()=>{shift=0;renderSong()};
 $('focusZoomIn').onclick=()=>{lyricZoom=Math.min(2,Math.round((lyricZoom+0.1)*10)/10);renderSong()};$('focusZoomOut').onclick=()=>{lyricZoom=Math.max(0.5,Math.round((lyricZoom-0.1)*10)/10);renderSong()};
