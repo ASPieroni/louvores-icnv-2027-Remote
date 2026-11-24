@@ -1065,7 +1065,7 @@ let youtubeFadeState=null;
 function restoreYoutubeFadePlayer(){if(!youtubeFadeState)return;const state=youtubeFadeState;youtubeFadeState=null;clearTimeout(state.timer);const box=$('youtubeMiniPlayer');if(box){if(state.parent)state.parent.appendChild(box);if(state.style===null)box.removeAttribute('style');else box.setAttribute('style',state.style);box.classList.remove('youtube-fading');}}
 function unloadYoutubeFrame(){const frame=$('youtubeMiniFrame');if(!frame)return;try{frame.src='about:blank';}catch(e){}const replacement=frame.cloneNode(false);replacement.removeAttribute('src');frame.replaceWith(replacement);}
 function closeYoutubePlayer(){restoreYoutubeFadePlayer();unloadYoutubeFrame();const box=$('youtubeMiniPlayer');if(box)box.classList.add('hide');}
-function returnToSongList(){if($('viewer').classList.contains('hide'))return false;if(typeof saveSongAnnotations==='function'&&selected)saveSongAnnotations();if(typeof setSongPenMode==='function')setSongPenMode(false);if(typeof setSongEraserMode==='function')setSongEraserMode(false);presentationMode=false;presentationSongs=[];presentationIndex=-1;closeYoutubePlayer();closeSongPdfViewer();$('viewer').classList.remove('focus-lyrics','presentation-mode');$('viewer').classList.add('hide');$('catalog').classList.remove('hide');renderCatalog();return true;}
+function returnToSongList(){if($('viewer').classList.contains('hide'))return false;if(typeof deactivateChordEditingModes==='function')deactivateChordEditingModes();if(typeof saveSongAnnotations==='function'&&selected)saveSongAnnotations();if(typeof setSongPenMode==='function')setSongPenMode(false,true,true);if(typeof setSongEraserMode==='function')setSongEraserMode(false,true,true);presentationMode=false;presentationSongs=[];presentationIndex=-1;closeYoutubePlayer();closeSongPdfViewer();$('viewer').classList.remove('focus-lyrics','presentation-mode');$('viewer').classList.add('hide');$('catalog').classList.remove('hide');renderCatalog();return true;}
 window.icnvHandleAndroidBack=returnToSongList;
 function finishYoutubeFade(){if(!youtubeFadeState)return;unloadYoutubeFrame();restoreYoutubeFadePlayer();const box=$('youtubeMiniPlayer');if(box)box.classList.add('hide');}
 function openYoutubePlayer(){if(!selected)return;if(youtubeFadeState)restoreYoutubeFadePlayer();const id=youtubeVideoId(selected.youtubeUrl);if(!id){alert('Não consegui reconhecer o vídeo desse link. Confira se é um link normal do YouTube (youtube.com/watch ou youtu.be).');return;}const box=$('youtubeMiniPlayer'),frame=$('youtubeMiniFrame'),title=$('youtubeMiniTitle');if(!box||!frame)return;title.textContent=selected.title||'Vídeo do louvor';const origin=location.protocol==='http:'||location.protocol==='https:'?'&origin='+encodeURIComponent(location.origin):'';frame.src='https://www.youtube-nocookie.com/embed/'+encodeURIComponent(id)+'?autoplay=1&playsinline=1&rel=0&enablejsapi=1'+origin;box.classList.remove('hide');}
@@ -1219,7 +1219,7 @@ function setChordAdjustMode(on){
  $('moveChordsToggle').setAttribute('aria-pressed',String(chordAdjustMode));
  $('moveChordsToggle').textContent=chordAdjustMode?'Concluir':'Ajustar cifras';
  $('lyrics').classList.toggle('adjust-chords',chordAdjustMode);
- if(chordAdjustMode){editMode=false;$('editToggle').classList.remove('editing');$('editToggle').textContent='✏️';$('lyrics').classList.remove('edit-mode');$('status').textContent='Arraste uma cifra para a esquerda ou direita. Toque em “Concluir ajuste” para terminar.';}
+ if(chordAdjustMode){editMode=false;$('editToggle').classList.remove('editing');$('editToggle').setAttribute('aria-pressed','false');$('editToggle').textContent='✏️';$('lyrics').classList.remove('edit-mode');$('status').textContent='Arraste uma cifra para a esquerda ou direita. Toque em “Concluir ajuste” para terminar.';}
 }
 $('moveChordsToggle').addEventListener('click',()=>setChordAdjustMode(!chordAdjustMode));
 let activeChordDrag=null;
@@ -1248,8 +1248,19 @@ function finishChordDrag(e){
 $('lyrics').addEventListener('pointerup',finishChordDrag);
 $('lyrics').addEventListener('pointercancel',finishChordDrag);
 function saveCurrentSongEdits(){if(!selected)return;const i=songs.findIndex(s=>s.id===selected.id);if(i>=0)songs[i]=selected;persistCatalog();renderCatalog();}
-function startDirectEditing(){if(chordAdjustMode)setChordAdjustMode(false);editMode=!editMode;if(editMode)disableSongAnnotationToolsForEditing();$('editToggle').classList.toggle('editing',editMode);$('editToggle').textContent='✏️';$('editToggle').setAttribute('aria-label',editMode?'Concluir edição':'Editar louvor');$('editToggle').title=editMode?'Concluir edição':'Editar louvor';$('lyrics').classList.toggle('edit-mode',editMode);}
+function startDirectEditing(){if(chordAdjustMode)setChordAdjustMode(false);editMode=!editMode;if(editMode)disableSongAnnotationToolsForEditing();$('editToggle').classList.toggle('editing',editMode);$('editToggle').setAttribute('aria-pressed',String(editMode));$('editToggle').textContent='✏️';$('editToggle').setAttribute('aria-label',editMode?'Concluir edição':'Editar louvor');$('editToggle').title=editMode?'Concluir edição':'Editar louvor';$('lyrics').classList.toggle('edit-mode',editMode);}
 $('editToggle').addEventListener('click',startDirectEditing);
+function deactivateChordEditingModes(){
+ if(chordAdjustMode)setChordAdjustMode(false);
+ if(editMode){editMode=false;$('editToggle').classList.remove('editing');$('editToggle').setAttribute('aria-pressed','false');$('editToggle').setAttribute('aria-label','Editar louvor');$('editToggle').title='Editar louvor';$('editToggle').textContent='✏️';$('lyrics').classList.remove('edit-mode');}
+}
+document.addEventListener('click',e=>{
+ if(!chordAdjustMode&&!editMode)return;
+ const target=e.target;
+ if(target.closest('#moveChordsToggle,#editToggle'))return;
+ if(target.closest('#lyrics'))return;
+ deactivateChordEditingModes();
+},true);
 $('lyrics').addEventListener('click',e=>{if(chordAdjustMode)return;if(!editMode||!selected)return;const chord=e.target.closest('.chord-token');if(chord){const lineEl=chord.parentElement;const chordEls=[...lineEl.querySelectorAll('.chord-token')];const idx=[...$('lyrics').children].indexOf(lineEl);if(idx<0)return;const raw=selected.lines[idx];const current=chord.textContent;const answer=prompt('Novo acorde:',current);if(answer===null||!answer.trim())return;const originalTokens=[...raw.matchAll(/\S+/g)];const tokenIndex=chordEls.indexOf(chord);if(originalTokens[tokenIndex]){const m=originalTokens[tokenIndex];selected.lines[idx]=raw.slice(0,m.index)+answer.trim()+raw.slice(m.index+m[0].length);saveCurrentSongEdits();renderSong();$('lyrics').classList.add('edit-mode');}return;}const line=e.target.closest('.line:not(.chords)');if(!line)return;const idx=[...$('lyrics').children].indexOf(line);if(idx<0)return;const raw=selected.lines[idx];if(/^\s*Tom\s*:/i.test(raw))return;const answer=prompt('Editar texto da linha:',raw);if(answer===null)return;selected.lines[idx]=answer;saveCurrentSongEdits();renderSong();$('lyrics').classList.add('edit-mode');});
 
 // Gerador de diagramas: calcula notas do acorde e procura uma posição realista no braço.
@@ -1749,7 +1760,7 @@ $('viewer').addEventListener('touchend',e=>{
 },{passive:true});
 
 function positionFocusPdfButton(){const viewer=$('viewer'),lyrics=$('lyrics'),button=$('focusSongPdf');if(!viewer||!lyrics||!button||!viewer.classList.contains('focus-lyrics'))return;const rect=lyrics.getBoundingClientRect();button.style.setProperty('--focus-pdf-top',Math.round(rect.top+7)+'px');}
-$('lyrics').addEventListener('dblclick',()=>{if(presentationMode){returnToSongList();return;}saveSongAnnotations();setSongPenMode(false,false,true);setSongEraserMode(false,false,true);const viewer=$('viewer');viewer.classList.toggle('focus-lyrics');ensureSongAnnotations($('lyrics'));requestAnimationFrame(()=>{redrawSongAnnotations();positionFocusPdfButton();});});
+$('lyrics').addEventListener('dblclick',()=>{if(presentationMode){deactivateChordEditingModes();returnToSongList();return;}deactivateChordEditingModes();saveSongAnnotations();setSongPenMode(false,false,true);setSongEraserMode(false,false,true);const viewer=$('viewer');viewer.classList.toggle('focus-lyrics');ensureSongAnnotations($('lyrics'));requestAnimationFrame(()=>{redrawSongAnnotations();positionFocusPdfButton();});});
 window.addEventListener('resize',()=>requestAnimationFrame(positionFocusPdfButton));
 $('focusUp').onclick=()=>{shift++;renderSong()};$('focusDown').onclick=()=>{shift--;renderSong()};$('focusReset').onclick=()=>{shift=0;renderSong()};
 $('focusZoomIn').onclick=()=>{lyricZoom=Math.min(2,Math.round((lyricZoom+0.1)*10)/10);renderSong()};$('focusZoomOut').onclick=()=>{lyricZoom=Math.max(0.5,Math.round((lyricZoom-0.1)*10)/10);renderSong()};
