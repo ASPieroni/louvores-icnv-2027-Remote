@@ -1576,11 +1576,13 @@ function sizeSongAnnotationLayer(svg,root){
  svg.style.width=width+'px';svg.style.height=height+'px';
 }
 function ensureSongAnnotationStrokeGroups(){while(songAnnotationStrokeGroups.length<songAnnotationStrokes.length)songAnnotationStrokeGroups.push(songAnnotationNextGroup++);if(songAnnotationStrokeGroups.length>songAnnotationStrokes.length)songAnnotationStrokeGroups.length=songAnnotationStrokes.length;}
+function songAnnotationZoomScale(){return Math.max(0.1,Number(lyricZoom)||1);}
+function setSongAnnotationPathStyle(path){path.setAttribute('fill','none');path.setAttribute('stroke','#e53935');path.setAttribute('stroke-width','4');path.setAttribute('stroke-linecap','round');path.setAttribute('stroke-linejoin','round');path.setAttribute('transform',`scale(${songAnnotationZoomScale()})`);}
 function redrawSongAnnotations(){
  const root=$('lyrics'),svg=root&&root.querySelector('.song-annotation-layer');if(!svg)return;ensureSongAnnotationStrokeGroups();
  sizeSongAnnotationLayer(svg,root);svg.replaceChildren();
  const ns='http://www.w3.org/2000/svg';
- songAnnotationStrokes.forEach(d=>{const path=document.createElementNS(ns,'path');path.setAttribute('d',d);path.setAttribute('fill','none');path.setAttribute('stroke','#e53935');path.setAttribute('stroke-width','4');path.setAttribute('stroke-linecap','round');path.setAttribute('stroke-linejoin','round');path.setAttribute('vector-effect','non-scaling-stroke');svg.appendChild(path);});
+ songAnnotationStrokes.forEach(d=>{const path=document.createElementNS(ns,'path');path.setAttribute('d',d);setSongAnnotationPathStyle(path);svg.appendChild(path);});
 }
 function eraseSongAnnotationAt(svg,x,y,lockedGroup=null,eraserRadius=10){
  ensureSongAnnotationStrokeGroups();const paths=Array.from(svg.querySelectorAll('path')),radius=Math.max(10,Math.min(36,Number(eraserRadius)||10)),sampleStep=2.5;let targetIndex=-1,closest=Infinity;
@@ -1648,18 +1650,18 @@ function ensureSongAnnotations(root){
  svg.addEventListener('dblclick',e=>{e.preventDefault();});
  svg.addEventListener('pointerdown',e=>{
   if((!songPenMode&&!songEraserMode)||!selected||(e.pointerType==='mouse'&&e.button!==0))return;
-  const rect=svg.getBoundingClientRect(),x=e.clientX-rect.left,y=e.clientY-rect.top;
+  const rect=svg.getBoundingClientRect(),scale=songAnnotationZoomScale(),x=(e.clientX-rect.left)/scale,y=(e.clientY-rect.top)/scale;
   songAnnotationDrawing=true;songAnnotationErasing=songEraserMode;songAnnotationEraserGroup=null;
   if(songAnnotationErasing){songEraserLastX=x;songEraserLastY=y;songEraserLastTime=e.timeStamp||performance.now();songEraserRadius=10;songAnnotationEraserGroup=eraseSongAnnotationAt(svg,x,y,null,songEraserRadius);}
   else{
    songAnnotationPath=`M ${x.toFixed(1)} ${y.toFixed(1)}`;songAnnotationStrokes.push(songAnnotationPath);ensureSongAnnotationStrokeGroups();saveSongAnnotations(true);
-   const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d',songAnnotationPath);path.setAttribute('fill','none');path.setAttribute('stroke','#e53935');path.setAttribute('stroke-width','4');path.setAttribute('stroke-linecap','round');path.setAttribute('stroke-linejoin','round');path.setAttribute('vector-effect','non-scaling-stroke');svg.appendChild(path);svg._activePath=path;
+   const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d',songAnnotationPath);path.setAttribute('fill','none');path.setAttribute('stroke','#e53935');path.setAttribute('stroke-width','4');path.setAttribute('stroke-linecap','round');path.setAttribute('stroke-linejoin','round');path.setAttribute('transform',`scale(${songAnnotationZoomScale()})`);svg.appendChild(path);svg._activePath=path;
   }
   try{svg.setPointerCapture(e.pointerId);}catch(_){}e.preventDefault();e.stopPropagation();
  });
  svg.addEventListener('pointermove',e=>{
   if(!songAnnotationDrawing)return;
-  const rect=svg.getBoundingClientRect(),x=e.clientX-rect.left,y=e.clientY-rect.top;
+  const rect=svg.getBoundingClientRect(),scale=songAnnotationZoomScale(),x=(e.clientX-rect.left)/scale,y=(e.clientY-rect.top)/scale;
   if(songAnnotationErasing){
    const now=e.timeStamp||performance.now(),dt=Math.max(1,now-songEraserLastTime),speed=Math.hypot(x-songEraserLastX,y-songEraserLastY)/dt;
    const targetRadius=Math.min(36,10+speed*14);songEraserRadius=Math.max(10,Math.min(36,songEraserRadius*0.55+targetRadius*0.45));
