@@ -1207,7 +1207,13 @@ function saveChordOffset(songId,lineIndex,tokenIndex,offset){
  try{localStorage.setItem('icnv_chord_offsets_v1',JSON.stringify(chordOffsets));return true;}
  catch(e){alert('Não foi possível salvar o ajuste das cifras neste aparelho. Verifique o espaço disponível no navegador.');return false;}
 }
+function disableSongAnnotationToolsForEditing(){
+ if(!songPenMode&&!songEraserMode)return;
+ stopSongAnnotationGesture();saveSongAnnotations();
+ setSongPenMode(false,true);setSongEraserMode(false,true);
+}
 function setChordAdjustMode(on){
+ if(on)disableSongAnnotationToolsForEditing();
  chordAdjustMode=!!on;
  $('moveChordsToggle').classList.toggle('moving',chordAdjustMode);
  $('moveChordsToggle').setAttribute('aria-pressed',String(chordAdjustMode));
@@ -1242,7 +1248,7 @@ function finishChordDrag(e){
 $('lyrics').addEventListener('pointerup',finishChordDrag);
 $('lyrics').addEventListener('pointercancel',finishChordDrag);
 function saveCurrentSongEdits(){if(!selected)return;const i=songs.findIndex(s=>s.id===selected.id);if(i>=0)songs[i]=selected;persistCatalog();renderCatalog();}
-function startDirectEditing(){if(chordAdjustMode)setChordAdjustMode(false);editMode=!editMode;$('editToggle').classList.toggle('editing',editMode);$('editToggle').textContent='✏️';$('editToggle').setAttribute('aria-label',editMode?'Concluir edição':'Editar louvor');$('editToggle').title=editMode?'Concluir edição':'Editar louvor';$('lyrics').classList.toggle('edit-mode',editMode);}
+function startDirectEditing(){if(chordAdjustMode)setChordAdjustMode(false);editMode=!editMode;if(editMode)disableSongAnnotationToolsForEditing();$('editToggle').classList.toggle('editing',editMode);$('editToggle').textContent='✏️';$('editToggle').setAttribute('aria-label',editMode?'Concluir edição':'Editar louvor');$('editToggle').title=editMode?'Concluir edição':'Editar louvor';$('lyrics').classList.toggle('edit-mode',editMode);}
 $('editToggle').addEventListener('click',startDirectEditing);
 $('lyrics').addEventListener('click',e=>{if(chordAdjustMode)return;if(!editMode||!selected)return;const chord=e.target.closest('.chord-token');if(chord){const lineEl=chord.parentElement;const chordEls=[...lineEl.querySelectorAll('.chord-token')];const idx=[...$('lyrics').children].indexOf(lineEl);if(idx<0)return;const raw=selected.lines[idx];const current=chord.textContent;const answer=prompt('Novo acorde:',current);if(answer===null||!answer.trim())return;const originalTokens=[...raw.matchAll(/\S+/g)];const tokenIndex=chordEls.indexOf(chord);if(originalTokens[tokenIndex]){const m=originalTokens[tokenIndex];selected.lines[idx]=raw.slice(0,m.index)+answer.trim()+raw.slice(m.index+m[0].length);saveCurrentSongEdits();renderSong();$('lyrics').classList.add('edit-mode');}return;}const line=e.target.closest('.line:not(.chords)');if(!line)return;const idx=[...$('lyrics').children].indexOf(line);if(idx<0)return;const raw=selected.lines[idx];if(/^\s*Tom\s*:/i.test(raw))return;const answer=prompt('Editar texto da linha:',raw);if(answer===null)return;selected.lines[idx]=answer;saveCurrentSongEdits();renderSong();$('lyrics').classList.add('edit-mode');});
 
