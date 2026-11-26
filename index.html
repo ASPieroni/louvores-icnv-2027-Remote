@@ -1314,7 +1314,7 @@ function renderAlignedChordLine(originalLine, step, lineIndex){
    const baseX=preserveExactSpacing?wanted:Math.max(wanted,previousRight+minGap);
    const offset=getChordOffset(selected.id,lineIndex,tokenIndex);
    const x=Math.max(0,baseX+offset*spacingScale*(baseFontSize/15));
-   const span=document.createElement('span');span.className='chord-token';span.title='Toque para ver o diagrama do acorde';span.setAttribute('role','button');span.tabIndex=0;span.dataset.tokenIndex=String(tokenIndex);span.dataset.baseX=String(baseX);span.style.left=`${x}px`;span.textContent=chord;div.appendChild(span);
+   const span=document.createElement('span');span.className='chord-token';span.title='Toque para ver o diagrama do acorde';span.setAttribute('role','button');span.tabIndex=0;span.dataset.tokenIndex=String(tokenIndex);span.dataset.baseX=String(baseX);span.dataset.offsetScale=String(spacingScale*(baseFontSize/15));span.style.left=`${x}px`;span.textContent=chord;div.appendChild(span);
    // Mantém a largura do verso suficiente para exibir cifras longas.
    const actualChordWidth=(preserveExactSpacing?monoCanvas.measureText(chord).width+chord.length*letterSpacing:baseMeasure(chord))*lyricZoom;
    previousRight=baseX+actualChordWidth+2*spacingScale;
@@ -1348,7 +1348,7 @@ function chordOffsetKey(songId,lineIndex,tokenIndex){return `${songId}:${lineInd
 function getChordOffset(songId,lineIndex,tokenIndex){return Number(chordOffsets[chordOffsetKey(songId,lineIndex,tokenIndex)])||0;}
 function saveChordOffset(songId,lineIndex,tokenIndex,offset){
  const key=chordOffsetKey(songId,lineIndex,tokenIndex);
- if(Math.abs(offset)<1)delete chordOffsets[key];else chordOffsets[key]=Math.round(offset);
+ if(Math.abs(offset)<0.01)delete chordOffsets[key];else chordOffsets[key]=Math.round(offset*100)/100;
  try{localStorage.setItem('icnv_chord_offsets_v1',JSON.stringify(chordOffsets));return true;}
  catch(e){alert('Não foi possível salvar o ajuste das cifras neste aparelho. Verifique o espaço disponível no navegador.');return false;}
 }
@@ -1389,7 +1389,7 @@ function finishChordDrag(e){
  if(e&&Number.isFinite(e.clientX))d.latestX=e.clientX;
  if(d.frame){cancelAnimationFrame(d.frame);d.frame=0;}
  const delta=d.latestX-d.startX,finalLeft=Math.max(0,d.startLeft+delta);d.chord.style.transform='';d.chord.style.left=`${finalLeft}px`;activeChordDrag=null;d.chord.classList.remove('dragging');
- if(d.moved){const width=Math.max(d.line.scrollWidth,finalLeft+d.chord.offsetWidth+8);d.line.style.width=`${width}px`;d.line.style.minWidth=`${width}px`;const offset=finalLeft-(Number(d.chord.dataset.baseX)||0);if(saveChordOffset(d.songId,d.lineIndex,d.tokenIndex,offset))$('status').textContent='Posição da cifra salva neste aparelho.';redrawSongAnnotations();}
+ if(d.moved){const width=Math.max(d.line.scrollWidth,finalLeft+d.chord.offsetWidth+8);d.line.style.width=`${width}px`;d.line.style.minWidth=`${width}px`;const screenOffset=finalLeft-(Number(d.chord.dataset.baseX)||0),zoomScale=Math.max(0.01,Number(d.chord.dataset.offsetScale)||1),anchoredOffset=screenOffset/zoomScale;if(saveChordOffset(d.songId,d.lineIndex,d.tokenIndex,anchoredOffset))$('status').textContent='Posição da cifra salva neste aparelho.';redrawSongAnnotations();}
 }
 $('lyrics').addEventListener('pointerup',finishChordDrag);
 $('lyrics').addEventListener('pointercancel',finishChordDrag);
