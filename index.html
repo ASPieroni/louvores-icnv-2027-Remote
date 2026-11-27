@@ -423,6 +423,15 @@ body:has(#viewer:not(.hide)) > header h1{color:var(--text)!important}
 .youtube-mini-head:active{cursor:grabbing}
 .youtube-mini-head span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;pointer-events:none}
 .youtube-mini-head button{flex:0 0 28px;width:28px;height:28px;padding:0;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--text);font:24px/1 system-ui,sans-serif;cursor:pointer}
+.youtube-mini-player.minimized{width:min(220px,calc(100vw - 24px))!important;height:36px!important;min-height:36px!important;max-height:36px!important;overflow:hidden!important}
+.youtube-mini-player.minimized .youtube-mini-head{height:36px}
+.youtube-mini-player.minimized .youtube-mini-frame-wrap{position:absolute;left:-2px;top:-2px;width:1px;height:1px;min-width:1px;min-height:1px;opacity:.01;pointer-events:none;overflow:hidden}
+.youtube-mini-player.minimized .youtube-mini-controls,.youtube-mini-player.minimized .youtube-mini-resize{display:none!important}
+.youtube-mini-head #youtubeMiniMinimize{font-size:18px;line-height:1}
+.youtube-mini-youtube-icon{display:none!important;flex:0 0 23px;width:23px;height:17px;align-items:center;justify-content:center;pointer-events:none!important}
+.youtube-mini-youtube-icon svg{display:block;width:22px;height:16px}
+.youtube-mini-player.minimized .youtube-mini-youtube-icon{display:flex!important}
+
 .youtube-mini-frame-wrap{width:100%;aspect-ratio:16/9;background:#000}
 .youtube-mini-frame-wrap iframe{display:block;width:100%;height:100%;border:0}
 .youtube-mini-controls{padding:7px 8px 8px;background:var(--panel2);border-top:1px solid var(--line);color:var(--text);font:11px system-ui,sans-serif}
@@ -673,6 +682,68 @@ html[data-theme="azul-marinho"] .viewer.focus-lyrics #focusSongPdf{border:0!impo
   color:var(--accent)!important;
 }
 </style>
+<style id="icnv-metronome-styles">
+.icnv-metronome-panel{position:fixed;right:12px;bottom:14px;z-index:1800;width:min(300px,calc(100vw - 24px));height:min(360px,calc(100dvh - 24px));min-height:min(310px,calc(100dvh - 24px));max-height:calc(100dvh - 24px);overflow:hidden;overscroll-behavior:contain;border:1px solid color-mix(in srgb,var(--accent) 42%,var(--line));border-radius:18px;background:var(--panel);color:var(--text);box-shadow:0 14px 38px rgba(0,0,0,.3),0 0 0 3px color-mix(in srgb,var(--accent) 10%,transparent);}
+.icnv-metronome-panel.hide{display:none!important}
+.icnv-metronome-head{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:46px;padding:6px 8px 6px 14px;background:linear-gradient(110deg,var(--accent-soft),var(--panel2));border-bottom:1px solid color-mix(in srgb,var(--accent) 24%,var(--line));color:var(--accent);font-size:14px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.icnv-metronome-head:active{cursor:grabbing}
+.icnv-metronome-head button{display:grid;place-items:center;flex:0 0 32px;width:32px;height:32px;min-height:32px;padding:0;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--text);font:23px/1 system-ui,sans-serif;cursor:pointer}
+.icnv-metronome-body{padding:12px 15px 14px}
+.icnv-metronome-tempo-row{display:grid;grid-template-columns:48px 1fr 48px;align-items:center;gap:10px}
+.icnv-metronome-tempo-row>button,.icnv-metronome-actions button{min-height:42px;border:1px solid color-mix(in srgb,var(--accent) 45%,var(--line));border-radius:11px;background:var(--accent-soft);color:var(--accent);font:800 18px system-ui,sans-serif;cursor:pointer}
+.icnv-metronome-tempo-row label{display:flex;align-items:center;justify-content:center;gap:6px;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.06em}
+.icnv-metronome-bpm-caption{font-size:11px}
+#icnvMetronomeBpm{width:90px;height:42px;padding:3px 6px;border:1px solid color-mix(in srgb,var(--accent) 42%,var(--line));border-radius:10px;background:var(--bg);color:var(--text);font:850 22px/1 system-ui,sans-serif;text-align:center;outline:none;font-variant-numeric:tabular-nums}
+#icnvMetronomeBpm:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 20%,transparent)}
+.icnv-metronome-classic-instrument{position:relative;display:flex;justify-content:center;align-items:center;height:192px;margin:5px auto 0;overflow:hidden}
+.icnv-metronome-instrument-svg{height:178px;width:170px;overflow:visible}
+.icnv-metronome-instrument-svg .metro-case{fill:color-mix(in srgb,var(--accent) 32%,var(--panel2));stroke:var(--accent);stroke-width:2.2;stroke-linejoin:round}
+.icnv-metronome-instrument-svg .metro-window{fill:var(--bg);stroke:color-mix(in srgb,var(--accent) 32%,var(--line));stroke-width:1}
+.icnv-metronome-instrument-svg .metro-scale{fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round;opacity:.82}
+.icnv-metronome-instrument-svg .metro-pendulum{transform-box:view-box;transform-origin:90px 154px;transform:rotate(-24deg);transition:transform var(--metro-swing-duration,200ms) cubic-bezier(.22,.7,.32,1)}
+.icnv-metronome-instrument-svg .metro-pendulum path{fill:none;stroke:var(--text);stroke-width:5;stroke-linecap:round}
+.icnv-metronome-instrument-svg .metro-weight,.icnv-metronome-instrument-svg .metro-joint{fill:var(--text)}
+.icnv-metronome-instrument-svg .metro-joint{fill:var(--accent);stroke:var(--panel);stroke-width:2}
+.icnv-metronome-instrument-svg .metro-base{fill:none;stroke:var(--accent);stroke-width:4;stroke-linecap:round}
+#icnvMetronomePendulum.swing-right{transform:rotate(24deg)}
+#icnvMetronomeResize{position:sticky;bottom:0;z-index:3;display:grid;place-items:center;width:25px;height:25px;margin:-23px 1px 0 auto;padding:0;border:0;border-radius:6px;background:linear-gradient(135deg,transparent 42%,var(--panel2) 43%);color:var(--accent);cursor:nwse-resize;touch-action:none;user-select:none;-webkit-user-select:none}
+#icnvMetronomeResize svg{width:15px;height:15px;opacity:.9;pointer-events:none}
+#icnvMetronomeResize:active{background:var(--accent-soft)}
+.icnv-metronome-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.icnv-metronome-actions button{min-height:43px;padding:7px 8px;font:800 13px system-ui,sans-serif}
+.icnv-metronome-actions .icnv-metronome-start{background:var(--accent);border-color:var(--accent);color:#fff}
+.icnv-metronome-actions .icnv-metronome-start[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent)}
+.icnv-metronome-beat-row{display:flex;align-items:center;justify-content:center;gap:9px;margin-top:9px;color:var(--text);font:750 12px system-ui,sans-serif;font-variant-numeric:tabular-nums}
+.icnv-metronome-beat-dot{width:11px;height:11px;flex:0 0 11px;border-radius:50%;background:var(--line);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 9%,transparent);transition:transform .08s,background .08s,box-shadow .08s}
+.icnv-metronome-beat-dot.is-beating{transform:scale(1.35);background:var(--accent);box-shadow:0 0 0 5px color-mix(in srgb,var(--accent) 22%,transparent)}
+.icnv-metronome-body p{margin:8px 0 0;color:var(--muted);font-size:10px;line-height:1.35;text-align:center}
+.icnv-metronome-panel button:active{filter:brightness(1.08)}
+@media(prefers-reduced-motion:reduce){.icnv-metronome-beat-dot{transition:none}.icnv-metronome-instrument-svg .metro-pendulum{transition-duration:.01ms}}
+/* Keep all controls visible while the panel is resized. */
+.icnv-metronome-panel{display:flex;flex-direction:column;min-height:min(310px,calc(100dvh - 24px));overflow:hidden;}
+.icnv-metronome-head{flex:0 0 46px;}
+.icnv-metronome-body{display:flex;flex:1 1 auto;flex-direction:column;min-height:0;overflow:hidden;padding-bottom:31px;}
+.icnv-metronome-tempo-row,.icnv-metronome-actions,.icnv-metronome-beat-row{flex:0 0 auto;}
+.icnv-metronome-classic-instrument{flex:1 1 auto;min-height:128px;height:auto;width:100%;}
+.icnv-metronome-instrument-svg{height:var(--metro-instrument-height,118px);max-height:100%;width:auto;transition:height .12s linear;}
+.icnv-metronome-body p{flex:0 0 auto;margin-top:6px;}
+#icnvMetronomeResize{position:absolute;right:3px;bottom:3px;margin:0;}
+.icnv-metronome-panel.metronome-compact{min-height:min(310px,calc(100dvh - 24px));}
+.icnv-metronome-panel.metronome-minimized{width:min(220px,calc(100vw - 24px))!important;height:auto!important;min-height:0!important;max-height:none!important;overflow:hidden!important;}
+.icnv-metronome-panel.metronome-minimized .icnv-metronome-body,#icnvMetronome.metronome-minimized #icnvMetronomeResize{display:none!important;}
+.icnv-metronome-panel.metronome-minimized .icnv-metronome-head{flex:0 0 46px;}
+.icnv-metronome-head strong{flex:1 1 auto;min-width:0;}
+
+.icnv-metronome-panel.metronome-compact .icnv-metronome-body{padding:7px 12px 29px;}
+.icnv-metronome-panel.metronome-compact .icnv-metronome-classic-instrument{min-height:var(--metro-instrument-height,118px);margin-top:1px;}
+.icnv-metronome-panel.metronome-compact .icnv-metronome-instrument-svg{height:var(--metro-instrument-height,118px);max-height:100%;}
+.icnv-metronome-panel.metronome-compact .icnv-metronome-actions{margin-top:4px;}
+.icnv-metronome-panel.metronome-compact .icnv-metronome-actions button{min-height:38px;padding:5px;}
+.icnv-metronome-panel.metronome-compact .icnv-metronome-beat-row{margin-top:5px;}
+.icnv-metronome-panel.metronome-compact .icnv-metronome-body p{display:none;}
+@media(max-height:470px){.icnv-metronome-panel{min-height:min(286px,calc(100dvh - 24px));}.icnv-metronome-panel .icnv-metronome-body{padding:7px 12px 29px}.icnv-metronome-panel .icnv-metronome-classic-instrument{min-height:var(--metro-instrument-height,118px);margin-top:1px}.icnv-metronome-panel .icnv-metronome-instrument-svg{height:var(--metro-instrument-height,118px);max-height:100%}.icnv-metronome-panel .icnv-metronome-beat-row{margin-top:5px}.icnv-metronome-panel .icnv-metronome-body p{display:none}}
+</style>
+<style id="icnv-metronome-shortcut-icon-style">.viewer .head-actions .metronome-shortcut-icon{display:block;width:23px;height:23px;overflow:visible}.viewer .head-actions .metronome-shortcut-icon .metronome-body{fill:currentColor}.viewer .head-actions .metronome-shortcut-icon .metronome-window{fill:var(--panel)}.viewer .head-actions .metronome-shortcut-icon .metronome-tick{fill:none;stroke:var(--muted);stroke-width:.8;stroke-linecap:round}.viewer .head-actions .metronome-shortcut-icon .metronome-pendulum{fill:none;stroke:var(--text);stroke-width:1.25;stroke-linecap:round}.viewer .head-actions .metronome-shortcut-icon .metronome-weight,.viewer .head-actions .metronome-shortcut-icon .metronome-pivot{fill:var(--text)}.viewer .head-actions .metronome-shortcut-icon .metronome-foot{fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round}.viewer .head-actions .metronome-shortcut{color:var(--accent)!important}</style>
 </head><body>
 <header>
   <div class="brand">
@@ -741,6 +812,7 @@ html[data-theme="azul-marinho"] .viewer.focus-lyrics #focusSongPdf{border:0!impo
       </ul></section>
       <section><h3>⚙️ Preferências, backup e compartilhamento</h3><ul>
         <li>Escolha uma paleta no seletor de temas do cabeçalho.</li>
+        <li>No menu ⋮, abra “Metrônomo” para ajustar BPM ou toque em “Tap Tempo” no ritmo de uma música que esteja ouvindo; ele não mede o áudio automaticamente.</li>
         <li>No menu ⋮, exporte um backup completo ou importe um backup para restaurar os dados. “Compartilhar louvores” exporta/importa louvores selecionados separadamente, sem substituir as preferências pessoais.</li>
         <li>O painel “Controle remoto / Sincronização” fica na tela inicial; requer a configuração do Firebase para funcionar.</li>
       </ul></section>
@@ -806,6 +878,7 @@ html[data-theme="azul-marinho"] .viewer.focus-lyrics #focusSongPdf{border:0!impo
         <div class="head-actions">
           <button class="action secondary icon-btn" id="editSong" title="Editar cadastro">✏️</button>
           <button class="action secondary icon-btn" id="deleteSong" title="Excluir louvor">🗑️</button>
+          <button class="action secondary icon-btn metronome-shortcut" id="openMetronome" type="button" aria-label="Abrir metrônomo" title="Metrônomo"><svg class="metronome-shortcut-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="metronome-body" d="M4.8 21 7.1 5.6A2.5 2.5 0 0 1 9.6 3.5h4.8a2.5 2.5 0 0 1 2.5 2.1L19.2 21H4.8Z"/><path class="metronome-window" d="m9.1 6.1 5.8 0 2.3 12.7H6.8L9.1 6.1Z"/><path class="metronome-tick" d="m9 8.5 2 .3m-2.5 2.2 2 .3M8 13.5l2 .3m-2.5 2.2 2 .3"/><path class="metronome-pendulum" d="m12 17.8-2.2-10"/><circle class="metronome-weight" cx="9.6" cy="7.2" r="1.35"/><circle class="metronome-pivot" cx="12" cy="17.8" r="1.05"/><path class="metronome-foot" d="M3.5 21h17"/></svg></button>
           <button class="star" id="songFav" aria-label="Adicionar aos favoritos">☆</button>
           <button class="action secondary icon-btn repertoire-btn" id="songRepertoire" type="button" aria-label="Adicionar ao Repertório" title="Adicionar ao Repertório">♫</button>
         </div>
@@ -895,6 +968,8 @@ html[data-theme="azul-marinho"] .viewer.focus-lyrics #focusSongPdf{border:0!impo
     <aside class="youtube-mini-player hide" id="youtubeMiniPlayer" aria-label="Player de vídeo do YouTube">
       <div class="youtube-mini-head" id="youtubeMiniDragHandle" title="Arraste para mover o mini-player">
         <span id="youtubeMiniTitle">Vídeo do louvor</span>
+        <span class="youtube-mini-youtube-icon" aria-label="YouTube" title="Player do YouTube" aria-hidden="true"><svg viewBox="0 0 24 17" focusable="false"><rect x=".5" y=".5" width="23" height="16" rx="4" fill="#f00"/><path d="M10 4.6 16.2 8.5 10 12.4Z" fill="#fff"/></svg></span>
+        <button type="button" id="youtubeMiniMinimize" aria-label="Minimizar mini-player" aria-expanded="true" title="Minimizar mini-player">−</button>
         <button type="button" id="youtubeMiniClose" aria-label="Fechar vídeo" title="Fechar vídeo">×</button>
       </div>
       <div class="youtube-mini-frame-wrap" id="youtubeMiniFrameWrap"><div id="youtubeMiniFrame"></div></div>
@@ -932,6 +1007,42 @@ html[data-theme="azul-marinho"] .viewer.focus-lyrics #focusSongPdf{border:0!impo
     </aside>
   </section>
 </div>
+<aside class="icnv-metronome-panel hide" id="icnvMetronome" role="dialog" aria-label="Metrônomo independente">
+  <div class="icnv-metronome-head" id="icnvMetronomeDragHandle">
+    <strong>🎵 Metrônomo</strong>
+    <button type="button" id="icnvMetronomeMinimize" aria-label="Minimizar metrônomo" aria-expanded="true" title="Minimizar">−</button>
+    <button type="button" id="icnvMetronomeClose" aria-label="Fechar metrônomo" title="Fechar">×</button>
+  </div>
+  <div class="icnv-metronome-body icnv-metronome-classic">
+    <div class="icnv-metronome-tempo-row">
+      <button type="button" id="icnvMetronomeMinus" aria-label="Diminuir BPM">−</button>
+      <label for="icnvMetronomeBpm"><span class="icnv-metronome-bpm-caption">BPM</span><input id="icnvMetronomeBpm" type="number" inputmode="numeric" min="30" max="300" step="1" value="100" aria-label="Tempo em batidas por minuto"></label>
+      <button type="button" id="icnvMetronomePlus" aria-label="Aumentar BPM">+</button>
+    </div>
+    <div class="icnv-metronome-classic-instrument" aria-hidden="true">
+      <svg class="icnv-metronome-instrument-svg" viewBox="0 0 180 190" focusable="false">
+        <path class="metro-case" d="M38 174 61 27q2-13 15-13h28q13 0 15 13l23 147H38Z"/>
+        <path class="metro-window" d="M69 30h42l21 127H48L69 30Z"/>
+        <path class="metro-scale" d="m66 47 16 2m-18 19 17 2m-20 19 17 2m-20 19 17 2m-20 19 17 2m-20 19 17 2"/>
+        <g id="icnvMetronomePendulum" class="metro-pendulum">
+          <path d="M90 154 115 35"/>
+          <circle class="metro-weight" cx="115" cy="35" r="8"/>
+          <circle class="metro-joint" cx="90" cy="154" r="5"/>
+        </g>
+        <path class="metro-base" d="M31 175h118"/>
+      </svg>
+    </div>
+    <div class="icnv-metronome-actions">
+      <button type="button" class="icnv-metronome-start" id="icnvMetronomeStart" aria-pressed="false">▶ Iniciar</button>
+      <button type="button" id="icnvMetronomeTap">👆 Tap Tempo</button>
+    </div>
+    <div class="icnv-metronome-beat-row"><span class="icnv-metronome-beat-dot" id="icnvMetronomeBeat" aria-hidden="true"></span><span id="icnvMetronomeStatus" role="status">100 BPM · pronto</span></div>
+    <p>Toque em Tap Tempo no ritmo da música por alguns tempos. Funciona com o vídeo ou outra fonte que você esteja ouvindo; o app não analisa o áudio automaticamente.</p>
+  </div>
+  <button type="button" id="icnvMetronomeResize" aria-label="Redimensionar janela do metrônomo" title="Arraste para redimensionar">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 13 13 5M9 13l4-4m-8 4 8-8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+  </button>
+</aside>
 
 <!-- Modal Edição / Adição Manual -->
 <div class="song-modal hide" id="songModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
@@ -1214,8 +1325,9 @@ function closeYoutubePlayer(){restoreYoutubeFadePlayer();unloadYoutubeFrame();co
 function returnToSongList(){if($('viewer').classList.contains('hide'))return false;if(typeof deactivateChordEditingModes==='function')deactivateChordEditingModes();if(typeof saveSongAnnotations==='function'&&selected)saveSongAnnotations();if(typeof setSongPenMode==='function')setSongPenMode(false,true,true);if(typeof setSongEraserMode==='function')setSongEraserMode(false,true,true);presentationMode=false;presentationSongs=[];presentationIndex=-1;closeYoutubePlayer();closeSongPdfViewer();$('viewer').classList.remove('focus-lyrics','presentation-mode');setFocusControlsCollapsed(false);$('viewer').classList.add('hide');$('catalog').classList.remove('hide');renderCatalog();return true;}
 window.icnvHandleAndroidBack=returnToSongList;
 function finishYoutubeFade(){if(!youtubeFadeState)return;unloadYoutubeFrame();restoreYoutubeFadePlayer();const box=$('youtubeMiniPlayer');if(box)box.classList.add('hide');}
-async function openYoutubePlayer(){if(!selected)return;if(youtubeFadeState)restoreYoutubeFadePlayer();const id=youtubeVideoId(selected.youtubeUrl);if(!id){alert('Não consegui reconhecer o vídeo desse link. Confira se é um link normal do YouTube (youtube.com/watch ou youtu.be).');return;}unloadYoutubeFrame();const token=youtubeOpenToken,box=$('youtubeMiniPlayer'),mount=$('youtubeMiniFrame'),title=$('youtubeMiniTitle');if(!box||!mount)return;title.textContent=selected.title||'Vídeo do louvor';renderYoutubeSegmentControls();$('youtubeMiniStatus').textContent='Carregando vídeo…';box.classList.remove('hide');try{const YTApi=await loadYoutubeIframeApi();if(token!==youtubeOpenToken||box.classList.contains('hide'))return;youtubePlayer=new YTApi.Player(mount,{height:'100%',width:'100%',videoId:id,host:'https://www.youtube-nocookie.com',playerVars:{autoplay:1,playsinline:1,rel:0,controls:1,enablejsapi:1},events:{onReady:()=>{$('youtubeMiniStatus').textContent='Marque A e B durante a reprodução para delimitar o trecho.';},onStateChange:event=>{if(event.data===0&&youtubeSegmentPlaying){stopYoutubeSegmentTimer();$('youtubeMiniStatus').textContent='O vídeo terminou.';}},onError:()=>{$('youtubeMiniStatus').textContent='O YouTube não conseguiu reproduzir este vídeo.';}}});}catch(error){if(token===youtubeOpenToken){$('youtubeMiniStatus').textContent=error.message||'Não consegui carregar o vídeo.';}}}
+async function openYoutubePlayer(){if(!selected)return;if(youtubeFadeState)restoreYoutubeFadePlayer();const id=youtubeVideoId(selected.youtubeUrl);if(!id){alert('Não consegui reconhecer o vídeo desse link. Confira se é um link normal do YouTube (youtube.com/watch ou youtu.be).');return;}unloadYoutubeFrame();const token=youtubeOpenToken,box=$('youtubeMiniPlayer'),mount=$('youtubeMiniFrame'),title=$('youtubeMiniTitle');if(!box||!mount)return;box.classList.remove('minimized');$('youtubeMiniMinimize').textContent='−';$('youtubeMiniMinimize').setAttribute('aria-label','Minimizar mini-player');$('youtubeMiniMinimize').setAttribute('title','Minimizar mini-player');$('youtubeMiniMinimize').setAttribute('aria-expanded','true');title.textContent=selected.title||'Vídeo do louvor';renderYoutubeSegmentControls();$('youtubeMiniStatus').textContent='Carregando vídeo…';box.classList.remove('hide');try{const YTApi=await loadYoutubeIframeApi();if(token!==youtubeOpenToken||box.classList.contains('hide'))return;youtubePlayer=new YTApi.Player(mount,{height:'100%',width:'100%',videoId:id,host:'https://www.youtube-nocookie.com',playerVars:{autoplay:1,playsinline:1,rel:0,controls:1,enablejsapi:1},events:{onReady:()=>{$('youtubeMiniStatus').textContent='Marque A e B durante a reprodução para delimitar o trecho.';},onStateChange:event=>{if(event.data===0&&youtubeSegmentPlaying){stopYoutubeSegmentTimer();$('youtubeMiniStatus').textContent='O vídeo terminou.';}},onError:()=>{$('youtubeMiniStatus').textContent='O YouTube não conseguiu reproduzir este vídeo.';}}});}catch(error){if(token===youtubeOpenToken){$('youtubeMiniStatus').textContent=error.message||'Não consegui carregar o vídeo.';}}}
 function renderYoutubeLink(){const b=$('youtubeLink');if(!b)return;const url=selected&&String(selected.youtubeUrl||'').trim();b.classList.toggle('hide',!url);b.onclick=openYoutubePlayer;}
+$('youtubeMiniMinimize').addEventListener('click',()=>{const box=$('youtubeMiniPlayer'),button=$('youtubeMiniMinimize');const minimized=box.classList.toggle('minimized');button.textContent=minimized?'□':'−';button.setAttribute('aria-label',minimized?'Restaurar mini-player':'Minimizar mini-player');button.setAttribute('title',minimized?'Restaurar mini-player':'Minimizar mini-player');button.setAttribute('aria-expanded',String(!minimized));});
 $('youtubeMiniClose').addEventListener('click',closeYoutubePlayer);
 $('youtubeMiniMarkA').addEventListener('click',()=>saveYoutubeSegmentPoint('A'));
 $('youtubeMiniMarkB').addEventListener('click',()=>saveYoutubeSegmentPoint('B'));
@@ -2303,4 +2415,42 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
 })();
 </script>
 
+<script id="icnv-metronome-script">
+(()=>{
+ const $=id=>document.getElementById(id),panel=$('icnvMetronome'),open=$('openMetronome'),close=$('icnvMetronomeClose'),minimize=$('icnvMetronomeMinimize'),handle=$('icnvMetronomeDragHandle'),resizeHandle=$('icnvMetronomeResize'),bpmInput=$('icnvMetronomeBpm'),pendulum=$('icnvMetronomePendulum'),start=$('icnvMetronomeStart'),tap=$('icnvMetronomeTap'),status=$('icnvMetronomeStatus'),dot=$('icnvMetronomeBeat');
+ if(!panel||!open||!bpmInput||!start||!tap)return;
+ let audioContext=null,schedulerTimer=null,running=false,nextBeatTime=0,beatNumber=0,tapTimes=[],dragState=null,restoreSize=null;
+ function setMinimized(value){if(value){if(panel.classList.contains('metronome-minimized'))return;restoreSize={width:panel.style.width,height:panel.style.height,maxHeight:panel.style.maxHeight};panel.classList.add('metronome-minimized');minimize.textContent='□';minimize.setAttribute('aria-label','Restaurar metrônomo');minimize.setAttribute('title','Restaurar');minimize.setAttribute('aria-expanded','false');}else{if(!panel.classList.contains('metronome-minimized'))return;panel.classList.remove('metronome-minimized');if(restoreSize){panel.style.width=restoreSize.width;panel.style.height=restoreSize.height;panel.style.maxHeight=restoreSize.maxHeight;restoreSize=null;}minimize.textContent='−';minimize.setAttribute('aria-label','Minimizar metrônomo');minimize.setAttribute('title','Minimizar');minimize.setAttribute('aria-expanded','true');syncInstrumentScale(panel.getBoundingClientRect().height);}}
+
+ const clampBpm=value=>Math.max(30,Math.min(300,Math.round(Number(value)||100)));
+ const currentBpm=()=>clampBpm(bpmInput.value);
+ const setStatus=text=>{status.textContent=text;};
+ const syncInstrumentScale=height=>{const h=Math.max(270,Math.min(520,Number(height)||panel.getBoundingClientRect().height));const px=Math.max(100,Math.min(170,h-210));panel.style.setProperty('--metro-instrument-height',Math.round(px)+'px');};
+ const flashBeat=delay=>{window.setTimeout(()=>{dot.classList.remove('is-beating');void dot.offsetWidth;dot.classList.add('is-beating');pendulum.classList.toggle('swing-right');window.setTimeout(()=>dot.classList.remove('is-beating'),115);},Math.max(0,delay));};
+ function getAudioContext(){const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx){setStatus('Áudio não disponível neste navegador.');return null;}if(!audioContext)audioContext=new Ctx();return audioContext;}
+ function scheduleClick(time,index){const ctx=audioContext;if(!ctx)return;const osc=ctx.createOscillator(),gain=ctx.createGain(),accent=index%4===0;osc.type='sine';osc.frequency.setValueAtTime(accent?1320:880,time);gain.gain.setValueAtTime(0.0001,time);gain.gain.exponentialRampToValueAtTime(accent?0.22:0.13,time+0.004);gain.gain.exponentialRampToValueAtTime(0.0001,time+0.055);osc.connect(gain);gain.connect(ctx.destination);osc.start(time);osc.stop(time+0.06);flashBeat((time-ctx.currentTime)*1000);}
+ function scheduler(){if(!running||!audioContext)return;const horizon=audioContext.currentTime+0.12;while(nextBeatTime<horizon){scheduleClick(nextBeatTime,beatNumber++);nextBeatTime+=60/currentBpm();}}
+ async function startMetronome(){const ctx=getAudioContext();if(!ctx)return;try{await ctx.resume();}catch(e){setStatus('Toque em Iniciar novamente para liberar o áudio.');return;}running=true;beatNumber=0;pendulum.classList.remove('swing-right');nextBeatTime=ctx.currentTime+0.04;start.textContent='■ Parar';start.setAttribute('aria-pressed','true');setStatus(currentBpm()+' BPM · tocando');scheduler();schedulerTimer=window.setInterval(scheduler,25);}
+ function stopMetronome(){running=false;if(schedulerTimer){clearInterval(schedulerTimer);schedulerTimer=null;}start.textContent='▶ Iniciar';start.setAttribute('aria-pressed','false');setStatus(currentBpm()+' BPM · pausado');dot.classList.remove('is-beating');pendulum.classList.remove('swing-right');}
+ function updateBpm(value){const next=clampBpm(value);bpmInput.value=String(next);pendulum.style.setProperty('--metro-swing-duration',Math.min(220,(60000/next)*0.38)+'ms');if(running)setStatus(next+' BPM · tocando');else setStatus(next+' BPM · pronto');}
+ open.addEventListener('click',()=>{const menu=$('backupMenu');if(menu)menu.open=false;panel.classList.remove('hide');setMinimized(false);syncInstrumentScale(panel.getBoundingClientRect().height);panel.classList.toggle('metronome-compact',window.innerHeight<470||panel.getBoundingClientRect().height<420);});
+ minimize.addEventListener('click',()=>setMinimized(!panel.classList.contains('metronome-minimized')));
+ close.addEventListener('click',()=>{stopMetronome();setMinimized(false);panel.classList.add('hide');});
+ $('icnvMetronomeMinus').addEventListener('click',()=>updateBpm(currentBpm()-1));
+ $('icnvMetronomePlus').addEventListener('click',()=>updateBpm(currentBpm()+1));
+ bpmInput.addEventListener('change',()=>updateBpm(bpmInput.value));
+ bpmInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();bpmInput.blur();updateBpm(bpmInput.value);}});
+ start.addEventListener('click',()=>{if(running)stopMetronome();else void startMetronome();});
+ tap.addEventListener('click',()=>{const now=performance.now(),last=tapTimes[tapTimes.length-1];if(last&&now-last>2500)tapTimes=[];if(last&&now-last<180){setStatus('Toques rápidos demais; marque cada batida uma vez.');return;}tapTimes.push(now);if(tapTimes.length>8)tapTimes.shift();flashBeat(0);if(tapTimes.length<3){setStatus('Tap Tempo · '+tapTimes.length+' toque'+(tapTimes.length===1?'':'s')+' — continue no ritmo');return;}const times=tapTimes.slice(-6),intervals=[];for(let i=1;i<times.length;i++)intervals.push(times[i]-times[i-1]);const mean=intervals.reduce((sum,x)=>sum+x,0)/intervals.length,bpm=60000/mean;if(!Number.isFinite(bpm)||bpm<30||bpm>300){setStatus('Ritmo fora da faixa de 30–300 BPM; toque novamente.');return;}updateBpm(Math.round(bpm));setStatus('Tap Tempo · '+currentBpm()+' BPM estimados ('+tapTimes.length+' toques)');});
+ handle.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;const r=panel.getBoundingClientRect();dragState={id:e.pointerId,dx:e.clientX-r.left,dy:e.clientY-r.top};panel.style.left=Math.round(r.left)+'px';panel.style.top=Math.round(r.top)+'px';panel.style.right='auto';panel.style.bottom='auto';try{handle.setPointerCapture(e.pointerId);}catch(_){}e.preventDefault();});
+ handle.addEventListener('pointermove',e=>{if(!dragState||e.pointerId!==dragState.id)return;const left=Math.max(6,Math.min(window.innerWidth-panel.offsetWidth-6,e.clientX-dragState.dx)),top=Math.max(6,Math.min(window.innerHeight-panel.offsetHeight-6,e.clientY-dragState.dy));panel.style.left=Math.round(left)+'px';panel.style.top=Math.round(top)+'px';e.preventDefault();});
+ const endDrag=e=>{if(dragState&&e.pointerId===dragState.id)dragState=null;};handle.addEventListener('pointerup',endDrag);handle.addEventListener('pointercancel',endDrag);
+ let resizeState=null;
+ resizeHandle.addEventListener('pointerdown',e=>{const r=panel.getBoundingClientRect();resizeState={id:e.pointerId,width:r.width,height:r.height,x:e.clientX,y:e.clientY,left:r.left,top:r.top};panel.style.left=Math.round(r.left)+'px';panel.style.top=Math.round(r.top)+'px';panel.style.right='auto';panel.style.bottom='auto';try{resizeHandle.setPointerCapture(e.pointerId);}catch(_){}e.preventDefault();e.stopPropagation();});
+ resizeHandle.addEventListener('pointermove',e=>{if(!resizeState||e.pointerId!==resizeState.id)return;const minW=Math.min(280,window.innerWidth-24),maxW=Math.max(minW,Math.min(520,window.innerWidth-resizeState.left-12)),availableH=Math.max(240,window.innerHeight-resizeState.top-12),minH=Math.min(310,availableH),maxH=availableH;const width=Math.max(minW,Math.min(maxW,resizeState.width+e.clientX-resizeState.x)),height=Math.max(minH,Math.min(maxH,resizeState.height+e.clientY-resizeState.y));panel.style.width=Math.round(width)+'px';panel.style.height=Math.round(height)+'px';panel.style.maxHeight=maxH+'px';syncInstrumentScale(height);panel.classList.toggle('metronome-compact',height<420||window.innerHeight<470);e.preventDefault();e.stopPropagation();});
+ const endResize=e=>{if(resizeState&&e.pointerId===resizeState.id)resizeState=null;};resizeHandle.addEventListener('pointerup',endResize);resizeHandle.addEventListener('pointercancel',endResize);
+ window.addEventListener('resize',()=>{if(panel.classList.contains('hide')||panel.style.left==='')return;const left=Math.max(6,Math.min(window.innerWidth-panel.offsetWidth-6,panel.getBoundingClientRect().left)),top=Math.max(6,Math.min(window.innerHeight-panel.offsetHeight-6,panel.getBoundingClientRect().top));panel.style.left=Math.round(left)+'px';panel.style.top=Math.round(top)+'px';syncInstrumentScale(panel.getBoundingClientRect().height);panel.classList.toggle('metronome-compact',window.innerHeight<470||panel.getBoundingClientRect().height<420);});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!panel.classList.contains('hide')){stopMetronome();panel.classList.add('hide');}});
+})();
+</script>
 </body></html>
